@@ -199,7 +199,7 @@ def main():
         ram[POKEMON_PARTY_AMOUNT_ADDRESS] = ram[POKEMON_PARTY_AMOUNT_ADDRESS] + 0x1
 
         # Write the pokemon entry to party entry id list
-        ram[POKEMON_PARTY_SPECIES_ID_START:POKEMON_PARTY_SPECIES_ID_START+0x6] = add_entry_id(ram[POKEMON_PARTY_AMOUNT_ADDRESS], ram[POKEMON_PARTY_SPECIES_ID_START:POKEMON_PARTY_SPECIES_ID_START+0x6], mew_specie_id)
+        ram[POKEMON_PARTY_SPECIES_ID_START:POKEMON_PARTY_SPECIES_ID_START+0x7] = add_entry_id(ram[POKEMON_PARTY_AMOUNT_ADDRESS], ram[POKEMON_PARTY_SPECIES_ID_START:POKEMON_PARTY_SPECIES_ID_START+0x7], mew_specie_id)
 
         # Write the original trainer name to the save file
         ram[original_trainer_name_offset:original_trainer_name_offset+POKEMON_TRAINER_AND_NICK_NAME_MAX_SIZE] = mew_original_trainer_name
