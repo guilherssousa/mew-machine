@@ -207,8 +207,9 @@ def main():
         # Write the pokemon name to the save file
         ram[new_prokemon_name_offset:new_prokemon_name_offset+POKEMON_TRAINER_AND_NICK_NAME_MAX_SIZE] = mew_pokemon_name
 
-        # Write Mew encounter to Pokedex
-        if(not is_captured_or_seen(ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1) and not is_captured_or_seen(ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)):
+        # Check if Mew is already registered on Pokedex.
+        if(not is_captured_or_seen(ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1) or not is_captured_or_seen(ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)):
+            # Write Mew encounter to Pokedex
             ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
             ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
         else:
