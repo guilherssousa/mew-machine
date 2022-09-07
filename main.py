@@ -209,13 +209,12 @@ def main():
         ram[CHECKSUM_BLOCK_END] = calculate_checksum(ram) & 0xff # Patch the save file to avoid integrity issues
 
         f.seek(0,0)
-        # f.write(ram)
-
+        f.write(ram)
 
         prints.ascii_mew()
 
         print("\nCongratulations! You got the Lvl. 5 Mythical Pokémon Mew!")
-        
+
         prints.certificate_of_authenticity(mew_trainer_id)
 
         return 0
