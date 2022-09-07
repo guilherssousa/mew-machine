@@ -4,8 +4,6 @@ import sys, os, random
 PWD = os.getcwd()
 SAVE_FILE_PATH = sys.argv[1]
 
-FINAL_PATH = os.path.join(PWD, SAVE_FILE_PATH)
-
 # Useful Memory Addresses
 POKEMON_PARTY_AMOUNT_ADDRESS = 0x2F2C
 
@@ -28,12 +26,22 @@ CAUGHT_SEEN_SIZE = 0x13
 # Other useful stuff
 END_CHARACTER = 0x50
 
+# Some checks before running the script
+
+if not os.path.isabs(SAVE_FILE_PATH):
+    SAVE_FILE_PATH = os.path.join(PWD, SAVE_FILE_PATH)
+
+if(os.path.exists(SAVE_FILE_PATH) == False):
+    print("Error: File does not exist. Please use a valid path to a .sav file.")
+    sys.exit(1)
+
+if(os.path.getsize(SAVE_FILE_PATH) != 0x8000):
+    print("Error: File is not a valid save file.")
+    sys.exit(1)
+
 def ask_for_permission():
     print("This script will modify your save file progress. Are you sure you want to continue? (y/n)", end=" ")
-    answer = input()
-    if(answer == "y"):
-        return True
-    return False
+    return input() == "y"
 
 def set_caught_or_seen_pokemon_bit(captured_or_seen, entry):
     byte = entry // 8
@@ -151,7 +159,7 @@ def generate_mew_data():
 
     pokemon_name = bytearray([0x8c, 0x84, 0x96, 0x50, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0])
 
-    return [specie_id, pokemon_struct, original_trainer_name, pokemon_name]
+    return [specie_id, pokemon_struct, original_trainer_name, pokemon_name, trainer_id]
 
 def main():
 
@@ -171,12 +179,8 @@ Built by guilherssousa https://github.com/guilherssousa"
 
     if not ask_for_permission():
         return
-
-    if(os.path.exists(FINAL_PATH) == False):
-        print("Error: File does not exist. Please use a relative path.")
-        return
     
-    with open(FINAL_PATH, 'rb+') as f:
+    with open(SAVE_FILE_PATH, 'rb+') as f:
         ram = bytearray(f.read())
         
         # Get the amount of pokemon in the party
@@ -185,7 +189,7 @@ Built by guilherssousa https://github.com/guilherssousa"
             return
         
         # Get the data for the mew
-        mew_specie_id, mew_pokemon_struct, mew_original_trainer_name, mew_pokemon_name = generate_mew_data()
+        mew_specie_id, mew_pokemon_struct, mew_original_trainer_name, mew_pokemon_name, mew_trainer_id = generate_mew_data()
 
         next_available_party_slot = POKEMON_PARTY_OFFSET_START + (ram[POKEMON_PARTY_AMOUNT_ADDRESS] * POKEMON_PARTY_OFFSET)
 
@@ -212,13 +216,56 @@ Built by guilherssousa https://github.com/guilherssousa"
         ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
         ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
 
-        print("Generating new checksum...")
+        print("\nGenerating new checksum...")
         ram[CHECKSUM_BLOCK_END] = calculate_checksum(ram) & 0xff # Patch the save file to avoid integrity issues
 
         f.seek(0,0)
-        f.write(ram)
+        # f.write(ram)
 
-        print("Congratulations! You got the Lvl. 5 Mythical Pokémon Mew!")
+        print("\nCongratulations! You got the Lvl. 5 Mythical Pokémon Mew!")
+
+        print("""
+                     .^!J^                                  
+                  .~JG##G:                                  
+                ^JGB#BBJ.                                   
+             .!YPPPP5?^.^~~!7YPG5.                          
+           :75P55PP5?JPB#######BG!                          
+         .75PP5JB####&&###BBBBBBB5:                         
+        !YJ7~^. 7B#######BBBGP55B#G:                        
+      ^?7:      :BBGPGBBBBBGBP?!P#B:                        
+     !?:        !#G#57GBBBBBG#5PG5^ .::^^^^^^^~^~~~~~~~^    
+    !7          .JGBBYP#BBBBBG55?~~~~^:...            .!!   
+   ~7             .~7J5GBBBGPYY55PPGGPPP!             :J^   
+   !!.         ..:^^^^^!YPP555PGBBP!^~!7:           :77:    
+    :~^^^^^^^^^^::.  ~PG5?!^Y###BBBP!.           .~77:      
+                     :~.    J###BBBB#GY~.     .:!7~.        
+                            5####BBBBB#BG7.:^~~^.           
+                           ~G#####BG#BBBB#5!:.              
+                           5B#####BGGBB###B:                
+                           JBGB##BBG55PPPP57.               
+                           ?55Y?JJYYJ7^..~5PJ               
+                           ~555:          ?PG?              
+                           .PGGP:         ^BB#J             
+                            !BBBP^         P###?            
+                             !GBB7         ?####7           
+                              .~~.         ~#####:          
+                                           .PB&BB~          
+                                            .~??^           
+        """)
+
+        print("""
+___________________________________________________________ 
+|  _______________________________________________________  |
+| | 
+                Certificate of Authenticity
+
+                    Trainer ID: {}
+| |
+| |_______________________________________________________| |
+|___________________________________________________________|
+        """.format(str(mew_trainer_id).rjust(5, '0')))
+
+        return 0
 
 if __name__ == '__main__':
     main()
