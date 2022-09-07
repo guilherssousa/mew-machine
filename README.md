@@ -1,6 +1,6 @@
 # Mew Machine
 
-A Python recreation of the [Mew Machine]() software. This script adds a nearly legit YOSHIRA Mew to your save file when you have a open slot in your party.
+A Python recreation of the [Mew Machine](#1-what-is-the-mew-machine) software. This script adds a nearly legit YOSHIRA Mew to your save file when you have a open slot in your party.
 
 ## Usage
 
