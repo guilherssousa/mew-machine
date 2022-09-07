@@ -45,6 +45,12 @@ def ask_for_permission():
     print("This script will modify your save file progress. Are you sure you want to continue? (y/n)", end=" ")
     return input() == "y"
 
+def is_captured_or_seen(captured_or_seen, entry):
+    byte = captured_or_seen[entry // 8]
+    bit = entry % 8
+
+    return (byte >> bit) & 1
+
 def set_caught_or_seen_pokemon_bit(captured_or_seen, entry):
     byte = entry // 8
     bit = entry % 8
@@ -202,8 +208,11 @@ def main():
         ram[new_prokemon_name_offset:new_prokemon_name_offset+POKEMON_TRAINER_AND_NICK_NAME_MAX_SIZE] = mew_pokemon_name
 
         # Write Mew encounter to Pokedex
-        ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
-        ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
+        if(not is_captured_or_seen(ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1) and not is_captured_or_seen(ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)):
+            ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[CAUGHT_OFFSET_START:CAUGHT_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
+            ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE] = set_caught_or_seen_pokemon_bit(ram[SEEN_OFFSET_START:SEEN_OFFSET_START+CAUGHT_SEEN_SIZE], 151-1)
+        else:
+            print("\nMew is already registered on your Pokédex. No need to add it again.")
 
         print("\nGenerating new checksum...")
         ram[CHECKSUM_BLOCK_END] = calculate_checksum(ram) & 0xff # Patch the save file to avoid integrity issues
